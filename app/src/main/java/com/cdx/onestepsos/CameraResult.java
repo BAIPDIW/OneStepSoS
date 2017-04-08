@@ -19,7 +19,7 @@ public class CameraResult extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.result);
+        setContentView(R.layout.camera_result);
         String path = getIntent().getStringExtra("picPath");
         ImageView imageView = (ImageView) findViewById(R.id.pic);
         try {
