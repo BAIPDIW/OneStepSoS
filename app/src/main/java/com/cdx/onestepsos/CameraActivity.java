@@ -42,7 +42,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     };
 

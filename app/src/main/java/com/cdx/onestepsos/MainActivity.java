@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         btn_capture = (Button) findViewById(R.id.btn_capture);
         Location location = new Location();
         location.init(getApplicationContext());
-        location.setTv_location(textView);
+        //location.set(textView);
         location.startLocation();
 
         Intent intent = new Intent(MainActivity.this,BluetoothServerService.class);

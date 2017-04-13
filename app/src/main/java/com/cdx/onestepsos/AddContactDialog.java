@@ -2,8 +2,8 @@ package com.cdx.onestepsos;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.View;
@@ -11,21 +11,27 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
+import java.util.ArrayList;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by CDX on 2017/4/8.
  */
 
 public class AddContactDialog extends Dialog{
+    public final String CREATETABLE = "create table if not exists contactstb(_mobile varchar(11) primary key,name varchar(20) not null)";
     private Activity context;
-    private EditText et_name;
-    private EditText et_mobile;
-    private Button btn_save_contacts;
-    private Button btn_cancel_contcts;
-    public AddContactDialog(Activity context) {
+    public EditText et_name;
+    public EditText et_mobile;
+    public Button btn_save_contacts;
+    public Button btn_cancel_contcts;
+    private View.OnClickListener onClickListener;
+    public AddContactDialog(Activity context,View.OnClickListener onClickListener) {
         super(context);
         this.context =  context;
+        this.onClickListener = onClickListener;
     }
 
     @Override
@@ -46,27 +52,64 @@ public class AddContactDialog extends Dialog{
         p.width = (int) (d.getWidth() * 0.8); // 宽度设置为屏幕的0.8
         dialogWindow.setAttributes(p);
         this.setCancelable(true);
-        btn_save_contacts.setOnClickListener(new View.OnClickListener() {
+        btn_save_contacts.setOnClickListener(onClickListener);
+       /* btn_save_contacts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    //将信息存储
-                SharedPreferences sp = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                if(!et_name.getText().toString().trim().equals("") && !et_mobile.getText().toString().trim().equals("")){
-                    editor.putString("ContactName1",et_name.getText().toString().trim());
-                    editor.putString("ContactMobile1",et_mobile.getText().toString().trim());
-                    editor.commit();
-                    Toast.makeText(context,"editor commit success",Toast.LENGTH_LONG).show();
-                    dismiss();
+                //将信息存储
+                if(!et_mobile.getText().toString().trim().equals("") && !et_name.getText().toString().trim().equals("")){
+                    String mobile = et_mobile.getText().toString().trim();
+                    String name = et_name.getText().toString().trim();
+                    ArrayList<Contact> contacts = getContacts();
+                    Log.i("CDX",contacts.size()+"");
+                    int i;
+                    for(i = 0 ; i < contacts.size() ; i ++){
+                        Log.i("CDX",contacts.get(i).getMobile());
+                        if(contacts.get(i).getMobile().equals(mobile)){
+                            Toast.makeText(context, "紧急电话重复,请重新输入", Toast.LENGTH_SHORT).show();
+                            et_mobile.setText("");
+                            et_mobile.requestFocus();
+                            et_mobile.findFocus();
+                            break;
+                        }
+                    }
+                    if( i == contacts.size()){
+                        ContentValues values = new ContentValues();
+                        values.put("_mobile",mobile);
+                        values.put("name",name);
+                        SQLiteDatabase db = context.openOrCreateDatabase("user.db",MODE_PRIVATE,null);
+                        db.execSQL(CREATETABLE);
+                        db.insert("contactstb",null,values);
+                        db.close();
+                        dismiss();
+                    }
+                }else{
+                    //信息不能为空
+                    Toast.makeText(context,"紧急联系人信息不能为空请重新输入",Toast.LENGTH_LONG).show();
                 }
+
             }
-        });
+        });*/
         btn_cancel_contcts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                      dismiss();
-
             }
         });
+    }
+    public ArrayList<Contact> getContacts(){
+        ArrayList<Contact> contacts = new ArrayList<Contact>();
+        SQLiteDatabase db = context.openOrCreateDatabase("user.db",MODE_PRIVATE,null);
+        db.execSQL(CREATETABLE);
+        Cursor cursor = db.rawQuery("select * from contactstb",null);
+        if(cursor != null){
+            while(cursor.moveToNext()){
+                Contact contact = new Contact(cursor.getString(cursor.getColumnIndex("name")).toString(),cursor.getString(cursor.getColumnIndex("_mobile")).toString());
+                contacts.add(contact);
+            }
+        }
+        cursor.close();
+        db.close();
+        return contacts;
     }
 }

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -28,9 +29,9 @@ public class BluetoothCommunThread extends Thread{
         this.serviceHandler = handler;
         this.socket = socket;
         Log.i("CDX","BluetoothCommunThread");
+
         try {
             this.inStream = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-            Log.i("CDX","outStream inStream is init");
             isRun = true;
         } catch (Exception e) {
             try {

@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
-import java.io.Serializable;
 
 /**
  * Created by CDX on 2017/3/28.
@@ -26,6 +25,11 @@ public class BluetoothServerService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -48,6 +52,7 @@ public class BluetoothServerService extends Service{
                     Log.i("CDX","连接成功开启通信线程");
                     communThread = new BluetoothCommunThread(serviceHandler, (BluetoothSocket)msg.obj);
                     communThread.start();
+                    sendBroadcast(new Intent(BluetoothTools.ACTION_CONNECT_SUCCESS));
                     break;
                 case BluetoothTools.MESSAGE_CONNECT_ERROR:
                     //连接错误
@@ -57,9 +62,12 @@ public class BluetoothServerService extends Service{
                 case BluetoothTools.MESSAGE_READ_OBJECT:
                     //读取到数据
                     //发送数据广播（包含数据对象）
-                    Intent dataIntent = new Intent(BluetoothTools.ACTION_DATA_TO_GAME);
+                    /*Intent dataIntent = new Intent(BluetoothTools.ACTION_DATA_TO_GAME);
                     dataIntent.putExtra(BluetoothTools.DATA, (Serializable)msg.obj);
-                    sendBroadcast(dataIntent);
+                    sendBroadcast(dataIntent);*/
+                    Intent intent = new Intent(getBaseContext(),ProgressActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getApplication().startActivity(intent);
                     break;
             }
             super.handleMessage(msg);

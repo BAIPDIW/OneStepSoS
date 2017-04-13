@@ -1,11 +1,17 @@
 package com.cdx.onestepsos;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+
 import static com.amap.api.location.AMapLocationClient.setApiKey;
 
 /**
@@ -15,14 +21,19 @@ import static com.amap.api.location.AMapLocationClient.setApiKey;
 
 public class Location {
 
+    private ProgressBar progressBar;
+    private boolean flag = true;
     private TextView tv_location;
     //声明AMapLocationClient类对象
     private AMapLocationClient mLocationClient = null;
     //声明AMapLocationClientOption对象
     private AMapLocationClientOption mLocationOption = null;
+    private Handler handler;
 
-    public void setTv_location(TextView tv){
-        tv_location = tv;
+    public void set(TextView tv,ProgressBar progressBar,Handler handler){
+        this.tv_location = tv;
+        this.progressBar = progressBar;
+        this.handler = handler;
     }
 
     //定义定位回调监听器
@@ -30,7 +41,22 @@ public class Location {
         @Override
         public void onLocationChanged(AMapLocation aMapLocation) {
             tv_location.setText(LocationUtil.getLocationStr(aMapLocation));
+            tv_location.setTextSize(10);
+            if(flag){
+                //一次定位成功,进度切换
+                Message message = handler.obtainMessage();
+                Bundle bundle = new Bundle();
+                bundle.putString("经度",aMapLocation.getLongitude()+"");
+                bundle.putString("纬度",aMapLocation.getLatitude()+"");
+                bundle.putString("地点",aMapLocation.getAddress());
+                message.setData(bundle);
+                message.what = 1;
+                message.sendToTarget();
+
+            }
+            flag = false;
         }
+
     };
 
     /**
