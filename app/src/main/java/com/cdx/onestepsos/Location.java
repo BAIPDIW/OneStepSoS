@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
@@ -21,7 +20,6 @@ import static com.amap.api.location.AMapLocationClient.setApiKey;
 
 public class Location {
 
-    private ProgressBar progressBar;
     private boolean flag = true;
     private TextView tv_location;
     //声明AMapLocationClient类对象
@@ -30,9 +28,8 @@ public class Location {
     private AMapLocationClientOption mLocationOption = null;
     private Handler handler;
 
-    public void set(TextView tv,ProgressBar progressBar,Handler handler){
+    public void set(TextView tv,Handler handler){
         this.tv_location = tv;
-        this.progressBar = progressBar;
         this.handler = handler;
     }
 

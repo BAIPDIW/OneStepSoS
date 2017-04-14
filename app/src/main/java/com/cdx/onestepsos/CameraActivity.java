@@ -6,11 +6,13 @@ import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,6 +25,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private Camera mCamera;
     private SurfaceView mPreview;
     private SurfaceHolder mHolder;
+    private Handler handler = new Handler();
+    private int cameraPosition = 1;//0代表前置摄像头，1代表后置摄像头
+    private int cameraCount;
+    private int photoCount = 0;
+    private Bundle picPathBundle = new Bundle();
     private Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -31,12 +38,30 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 FileOutputStream fos = new FileOutputStream(tempFile);
                 fos.write(data);
                 fos.close();
-                Intent intent = new Intent(CameraActivity.this, CameraResult.class);
-                intent.putExtra("picPath", tempFile.getAbsolutePath());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-                Log.i("CDX", "startActivity");
+               // Intent intent = new Intent(CameraActivity.this, CameraResult.class);
+                //intent.putExtra("picPath", tempFile.getAbsolutePath());
+                //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //startActivity(intent);
+                if(cameraPosition == 1){//后置拍照
+                    picPathBundle.putString("picPathBack",tempFile.getAbsolutePath());
+                }else if(cameraPosition == 0){//前置拍照
+                    picPathBundle.putString("picPathFront",tempFile.getAbsolutePath());
+                }
+                photoCount = photoCount +1;
+                if(photoCount == cameraCount) {
+                    Intent intent = new Intent();
+                    intent.putExtra("picPath",picPathBundle);
+                    setResult(1,intent);
+                    finish();
+                }else{
+                    CameraChange();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            capture();
+                        }
+                    },3*1000);
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -44,13 +69,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             }
         }
     };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_activity);
         mPreview = (SurfaceView) findViewById(R.id.preview);
         mHolder = mPreview.getHolder();
+        cameraCount = Camera.getNumberOfCameras();
+        Log.i("CDX","摄像头个数"+Camera.getNumberOfCameras()+"");
         mHolder.addCallback(this);
         mPreview.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,23 +84,67 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 mCamera.autoFocus(null);
             }
         });
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                |WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON|WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
     }
+    private void CameraChange(){
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        for(int i = 0 ; i < cameraCount ; i ++) {
+            Camera.getCameraInfo(i,cameraInfo);
+            if(cameraPosition == 1){//现在是后置,变为前置
+                if(cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT){
+                    mCamera.stopPreview();
+                    mCamera.release();
+                    mCamera = null;
+                    mCamera = Camera.open(i);
+                    try {
+                        mCamera.setPreviewDisplay(mHolder);//通过surfaceview显示取景画面
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                   // mCamera.startPreview();//开始预览
+                    setStartPreview(mCamera, mHolder);
+                    cameraPosition = 0;
+                    break;
+                }
+            }else{//现在是前置， 变更为后置
+                if(cameraInfo.facing  == Camera.CameraInfo.CAMERA_FACING_BACK) {//代表摄像头的方位，CAMERA_FACING_FRONT前置      CAMERA_FACING_BACK后置
+                    mCamera.stopPreview();//停掉原来摄像头的预览
+                    mCamera.release();//释放资源
+                    mCamera = null;//取消原来摄像头
+                    mCamera = Camera.open(i);//打开当前选中的摄像头
+                    try {
+                        mCamera.setPreviewDisplay(mHolder);//通过surfaceview显示取景画面
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //mCamera.startPreview();//开始预览
+                    setStartPreview(mCamera, mHolder);
+                    cameraPosition = 1;
+                    break;
+                }
+           }
+        }
 
-    public void capture(View view) {
+    }
+    public void capture() {
+        Log.i("CDX","capture");
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPictureFormat(ImageFormat.JPEG);
-        parameters.setPreviewSize(800, 400);
+       // parameters.setPreviewSize(800, 400);
+
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         mCamera.autoFocus(new Camera.AutoFocusCallback() {
             @Override
             public void onAutoFocus(boolean success, Camera camera) {
                 if (success) {
                     mCamera.takePicture(null, null, mPictureCallback);
+                }else{
+                    mCamera.takePicture(null, null, mPictureCallback);
                 }
             }
         });
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -84,15 +154,21 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 setStartPreview(mCamera, mHolder);
             }
         }
+        if(photoCount == 0) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    capture();
+                }
+            }, 3 * 1000);
+        }
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         releaseCamera();
 
     }
-
     /**
      * 获取Camera对象
      *

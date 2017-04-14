@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -11,7 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.ProgressBar;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +23,9 @@ import java.util.ArrayList;
  */
 
 public class ProgressActivity extends Activity{
-    private ProgressBar pb_location;
-    private ProgressBar pb_send_message;
-    private ProgressBar pb_take_photo_upload;
+    private ImageView img_location;
+    private ImageView img_send_message;
+    private ImageView img_photo;
 
     private TextView tv_progress_location;
     private TextView tv_progress_send_message;
@@ -46,8 +47,8 @@ public class ProgressActivity extends Activity{
             switch(msg.what){
                 case 1:
                     Toast.makeText(ProgressActivity.this,"定位成功",Toast.LENGTH_LONG).show();
-                   Bundle bundle = msg.getData();//定位 经纬度地址
-                    Log.i("CDX",bundle.get("地点").toString());
+                    img_location.setImageResource(R.drawable.gou);
+                    Bundle bundle = msg.getData();//定位 经纬度地址
                     //发送短信
                     ArrayList<Contact> contacts = getContacts();
                     for(int i = 0 ; i < contacts.size() ; i ++){
@@ -56,18 +57,35 @@ public class ProgressActivity extends Activity{
                         );
                         sendMessage.Send();
                     }
+                    Log.i("CDX","发送短信完成");
+                    //拍照
+                    img_send_message.setImageResource(R.drawable.gou);
+                    Intent intent = new Intent(ProgressActivity.this,CameraActivity.class);
+                    startActivityForResult(intent,1);
                     break;
             }
         }
     };
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+       if(resultCode == 1){
+           Bundle bundle = data.getBundleExtra("picPath");
+           String pic1 = bundle.getString("picPathBack");
+           String pic2 = bundle.getString("picPathFront");
+           Log.i("CDX","前摄:"+pic1+"\n 后摄:" + pic2);
+           img_photo.setImageResource(R.drawable.gou);
+       }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.progress_layout);
-        pb_location = (ProgressBar) findViewById(R.id.pb_location);
-        pb_send_message = (ProgressBar) findViewById(R.id.pb_send_message);
-        pb_take_photo_upload = (ProgressBar) findViewById(R.id.pb_take_photo_upload);
+        img_location = (ImageView) findViewById(R.id.img_location);
+        img_send_message = (ImageView) findViewById(R.id.img_send_message);
+        img_photo= (ImageView) findViewById(R.id.img_photo);
+
         tv_progress_location = (TextView) findViewById(R.id.tv_progress_location);
         tv_progress_photo = (TextView) findViewById(R.id.tv_progress_photo);
         tv_progress_send_message = (TextView) findViewById(R.id.tv_progress_send_message);
@@ -77,11 +95,13 @@ public class ProgressActivity extends Activity{
        //开启定位
         Location location = new Location();
         location.init(getApplicationContext());
-        location.set(tv_progress_location,pb_location,myHandler);
+        location.set(tv_progress_location,myHandler);
         location.startLocation();
 
+        //广播过滤
+        IntentFilter intentFilter = new IntentFilter();
+        registerReceiver(broadcastReceiver,intentFilter);
     }
-
     public ArrayList<Contact> getContacts() {
         ArrayList<Contact> contacts = new ArrayList<Contact>();
         SQLiteDatabase db = openOrCreateDatabase("user.db", MODE_PRIVATE, null);
@@ -96,5 +116,11 @@ public class ProgressActivity extends Activity{
         cursor.close();
         db.close();
         return contacts;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
     }
 }
