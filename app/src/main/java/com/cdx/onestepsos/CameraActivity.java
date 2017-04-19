@@ -7,12 +7,14 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,11 +27,15 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private Camera mCamera;
     private SurfaceView mPreview;
     private SurfaceHolder mHolder;
-    private Handler handler = new Handler();
+    private TextView tv_camera_show_time;
     private int cameraPosition = 1;//0代表前置摄像头，1代表后置摄像头
     private int cameraCount;
     private int photoCount = 0;
     private Bundle picPathBundle = new Bundle();
+    private Handler handler;
+    private Handler handler2;
+    private Thread thread;
+    private boolean flag = true;
     private Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -53,6 +59,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     intent.putExtra("picPath",picPathBundle);
                     setResult(1,intent);
                     finish();
+                    flag = false;
                 }else{
                     CameraChange();
                     handler.postDelayed(new Runnable() {
@@ -72,21 +79,55 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.camera_activity);
+        tv_camera_show_time = (TextView) findViewById(R.id.tv_camera_show_time);
         mPreview = (SurfaceView) findViewById(R.id.preview);
         mHolder = mPreview.getHolder();
         cameraCount = Camera.getNumberOfCameras();
         Log.i("CDX","摄像头个数"+Camera.getNumberOfCameras()+"");
         mHolder.addCallback(this);
+        handler = new Handler();
         mPreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mCamera.autoFocus(null);
             }
         });
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                |WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON|WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+                |WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON|WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD|WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        handler2 = new Handler() {
+            public void handleMessage(Message msg) {
+                tv_camera_show_time.setText((String)msg.obj);
+            }
+        };
+
+        thread = new Thread(runnable);
+        thread.start();
+
     }
+
+    public Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            String time;
+            while(flag){
+                time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date());
+                handler2.sendMessage(handler.obtainMessage(100,time));
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+    @Override
+    public void onBackPressed() {
+        return ;//屏蔽掉返回键
+    }
+
     private void CameraChange(){
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         for(int i = 0 ; i < cameraCount ; i ++) {
@@ -131,8 +172,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         Log.i("CDX","capture");
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPictureFormat(ImageFormat.JPEG);
-       // parameters.setPreviewSize(800, 400);
-
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         mCamera.autoFocus(new Camera.AutoFocusCallback() {
             @Override

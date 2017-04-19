@@ -9,12 +9,16 @@
         android:layout_weight="1"
         android:layout_height="wrap_content"
         android:textSize="24dp"
+        android:gravity="center"
+        android:textColor="#ffffff"
         android:text="姓名"/>
     <TextView
         android:id="@+id/lv_contacts_item_mobile"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:textColor="#ffffff"
+        android:gravity="center"
         android:textSize="24dp"
         android:text="联系电话"/>
 </LinearLayout>

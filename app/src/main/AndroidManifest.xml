@@ -8,20 +8,25 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".CameraActivity" />
+        <activity android:name=".MainActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+
+        </activity>
+        <activity android:name=".CameraActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".CameraResult" />
-        <activity android:name=".UiActivity">
+        <activity android:name=".UiActivity"/>
+        <activity android:name=".UiActivity2"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".ProgressActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"/>
 
-        </activity>
+
         <service android:name="com.amap.api.location.APSService"></service>
         <service android:name=".BluetoothServerService"></service>
     </application>

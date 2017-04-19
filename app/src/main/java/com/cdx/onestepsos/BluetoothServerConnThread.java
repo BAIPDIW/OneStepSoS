@@ -24,6 +24,9 @@ public class BluetoothServerConnThread extends Thread {
 	public BluetoothServerConnThread(Handler handler) {
 		this.serviceHandler = handler;
 		adapter = BluetoothAdapter.getDefaultAdapter();
+		if(!adapter.isEnabled()){
+			adapter.enable();
+		}
 	}
 
 	@Override
