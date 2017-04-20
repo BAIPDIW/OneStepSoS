@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -38,7 +37,6 @@ public class ProgressFragement extends Fragment{
             super.handleMessage(msg);
             switch(msg.what){
                 case 1:
-                    Toast.makeText(getActivity(),"定位成功", Toast.LENGTH_LONG).show();
                     img_location.setImageResource(R.drawable.gou);
                     Bundle bundle = msg.getData();//定位 经纬度地址
                     //发送短信
@@ -85,7 +83,7 @@ public class ProgressFragement extends Fragment{
     public ArrayList<Contact> getContacts() {
         ArrayList<Contact> contacts = new ArrayList<Contact>();
         SQLiteDatabase db = this.getActivity().openOrCreateDatabase("user.db", MODE_PRIVATE, null);
-        db.execSQL("create table if not exists contactstb(_mobile varchar(11) primary key,name varchar(20) not null)");
+        db.execSQL(ContactsFragment.CREATETABLE);
         Cursor cursor = db.rawQuery("select * from contactstb", null);
         if (cursor != null) {
             while (cursor.moveToNext()) {

@@ -29,11 +29,6 @@ public class BluetoothServerService extends Service{
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
     public void onCreate() {
         Log.i("CDX","BluetoothServerService is on create");
         if(!bluetoothAdapter.isEnabled()) {
@@ -66,14 +61,7 @@ public class BluetoothServerService extends Service{
                 case BluetoothTools.MESSAGE_READ_OBJECT:
                     //读取到数据
                     //发送数据广播（包含数据对象）
-                    /*Intent dataIntent = new Intent(BluetoothTools.ACTION_DATA_TO_GAME);
-                    dataIntent.putExtra(BluetoothTools.DATA, (Serializable)msg.obj);
-                    sendBroadcast(dataIntent);*/
-                    /*
-                    Intent intent = new Intent(getBaseContext(),ProgressActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplication().startActivity(intent);*/
-                    Intent intent1 = new Intent(getBaseContext(),UiActivity2.class);
+                    Intent intent1 = new Intent(getBaseContext(),UiActivity.class);
                     intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent1);
                     handler.postDelayed(new Runnable() {
@@ -92,13 +80,20 @@ public class BluetoothServerService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        handler.postDelayed(new Runnable() {
+        Log.i("CDX","BluetoothServerService is ondestroy");
+        /*handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 Intent intent = new Intent(BluetoothServerService.this,BluetoothServerService.class);//service被kill时重新启动
                 startService(intent);
             }
-        },2000);
+        },2000);*/
 
     }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
+
 }

@@ -15,16 +15,13 @@
         <activity android:name=".CameraActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".CameraResult" />
-        <activity android:name=".UiActivity"/>
-        <activity android:name=".UiActivity2"
+        <activity android:name=".UiActivity"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ProgressActivity"
-            android:launchMode="singleTask"/>
 
 
         <service android:name="com.amap.api.location.APSService"></service>
@@ -56,6 +53,12 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.READ_CONTACTS"/><!-- 读取通讯录权限 -->
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/><!-- 写入通讯录权限 -->
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <meta-data
         android:name="com.amap.api.v2.apikey"

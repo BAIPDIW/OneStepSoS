@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void skip() {
-        startActivity(new Intent(this, UiActivity2.class));
+        startActivity(new Intent(this, UiActivity.class));
         //finish();
     }
 }

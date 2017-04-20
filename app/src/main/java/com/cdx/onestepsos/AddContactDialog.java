@@ -21,7 +21,7 @@ import static android.content.Context.MODE_PRIVATE;
  */
 
 public class AddContactDialog extends Dialog{
-    public final String CREATETABLE = "create table if not exists contactstb(_mobile varchar(11) primary key,name varchar(20) not null)";
+
     private Activity context;
     public EditText et_name;
     public EditText et_mobile;
@@ -52,7 +52,7 @@ public class AddContactDialog extends Dialog{
         //p.height = (int) (d.getHeight() * 0.6); // 高度设置为屏幕的0.6
         p.width = (int) (d.getWidth() * 0.8); // 宽度设置为屏幕的0.8
         dialogWindow.setAttributes(p);
-        this.setCancelable(true);
+        this.setCancelable(false);
         btn_save_contacts.setOnClickListener(onClickListener);
         btn_cancel_contcts.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +64,7 @@ public class AddContactDialog extends Dialog{
     public ArrayList<Contact> getContacts(){
         ArrayList<Contact> contacts = new ArrayList<Contact>();
         SQLiteDatabase db = context.openOrCreateDatabase("user.db",MODE_PRIVATE,null);
-        db.execSQL(CREATETABLE);
+        db.execSQL(ContactsFragment.CREATETABLE);
         Cursor cursor = db.rawQuery("select * from contactstb",null);
         if(cursor != null){
             while(cursor.moveToNext()){
