@@ -32,6 +32,7 @@ public class UiActivity extends Activity{
     private ProgressFragement progressFragement;
     private ContactsFragment contactsFragment;
     private boolean isContactsFragment = true;
+    private Speech speech;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -41,8 +42,12 @@ public class UiActivity extends Activity{
                     img_bluetooth_state.setImageResource(R.drawable.gou);
                     tv_bluetooth_state.setText("已连接");
                     tv_bluetooth_state.setTextColor(Color.GREEN);
+                    speech.TextToSpeech("蓝牙已连接");
                     break;
                 case BluetoothTools.ACTION_DATA_TO_GAME:
+
+                    speech.TextToSpeech("请帮助我!!!请帮助我!!!");
+
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
                     progressFragement = new ProgressFragement();
@@ -118,6 +123,8 @@ public class UiActivity extends Activity{
         if(!sp.getBoolean("isSetting",false)){
             new UserInformationDialog(UiActivity.this).show();
         }
+
+        speech = new Speech(UiActivity.this);
     }
 
     @Override
@@ -128,6 +135,7 @@ public class UiActivity extends Activity{
             String pic2 = bundle.getString("picPathFront");
             Log.i("CDX","前摄:"+pic1+"\n 后摄:" + pic2);
             progressFragement.setImg_photo();
+            speech.TextToSpeech("拍照完成");
         }
     }
 
