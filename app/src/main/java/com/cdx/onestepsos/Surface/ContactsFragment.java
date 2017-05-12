@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Surface;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -20,6 +20,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.cdx.onestepsos.R;
+import com.cdx.onestepsos.Setting.AddContactDialog;
+import com.cdx.onestepsos.Setting.AddContactFromPhoneDialog;
+import com.cdx.onestepsos.Setting.Contact;
+import com.cdx.onestepsos.Setting.ListViewAddContactsAdapter;
+import com.cdx.onestepsos.Setting.ListViewContactAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,17 +133,6 @@ public class ContactsFragment extends Fragment implements View.OnClickListener{
                     public void onClick(DialogInterface dialog, int which) {
                         switch(which){
                             case 0:
-                               /*ArrayList<Contact> contacts = getContactsFromPhone();
-                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-                                alertDialog.setTitle("请选择联系人");
-                                String[] contactsName = new String[contacts.size()];
-                                for(int i  = 0 ;i < contacts.size() ;i ++){
-                                    contactsName[i] = contacts.get(i).getName().toString()+"    "+contacts.get(i).getMobile();
-                                }
-                                alertDialog.setMultiChoiceItems(contactsName,null,null);
-                                alertDialog.setPositiveButton("确认",null);
-                                alertDialog.setNegativeButton("取消",null);
-                                alertDialog.show();*/
                                 addContactFromPhoneDialog = new AddContactFromPhoneDialog(getActivity(),ContactsFragment.this);
                                 addContactFromPhoneDialog.show();
                                 break;

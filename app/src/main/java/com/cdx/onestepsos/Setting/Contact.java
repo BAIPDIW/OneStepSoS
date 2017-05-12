@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Setting;
 
 /**
  * Created by CDX on 2017/4/8.

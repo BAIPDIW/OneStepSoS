@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Setting;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -11,6 +11,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.cdx.onestepsos.Surface.ContactsFragment;
+import com.cdx.onestepsos.R;
 
 import java.util.ArrayList;
 

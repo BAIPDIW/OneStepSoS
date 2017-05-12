@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Setting;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -15,6 +15,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.cdx.onestepsos.R;
 
 import java.util.ArrayList;
 

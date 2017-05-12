@@ -29,6 +29,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textSize="25dp"
+                android:text="电话号码:"/>
+            <EditText
+                android:background="@null"
+                android:id="@+id/et_user_information_mobile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="请输入电话号码"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/et_shape"
+            android:padding="5dp">
+            <TextView
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="25dp"
                 android:text="姓名:"/>
             <EditText
                 android:background="@null"
@@ -50,12 +69,33 @@
                 android:textSize="25dp"
                 android:text="性别:"/>
 
-            <EditText
+            <!--<EditText
                 android:background="@null"
                 android:id="@+id/et_user_information_gender"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="请输入性别"/>
+                android:hint="请输入性别"/>-->
+            <RadioGroup
+                android:id="@+id/rg_gender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_gender_male"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="男"
+                    android:textSize="20dp"
+                    android:checked="true"
+                    />
+                <RadioButton
+                    android:id="@+id/rb_gender_female"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="女"
+                    android:textSize="20dp"/>
+            </RadioGroup>
         </LinearLayout>
         <LinearLayout
             android:padding="5dp"
@@ -130,18 +170,21 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:textSize="24sp"
             android:text="修改"/>
         <Button
             android:id="@+id/btn_user_information_save"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:textSize="24sp"
             android:text="保存"/>
         <Button
             android:id="@+id/btn_user_information_cancel"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:textSize="24sp"
             android:text="取消"/>
     </LinearLayout>
 </LinearLayout>

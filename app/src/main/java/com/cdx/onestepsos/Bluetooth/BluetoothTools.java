@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Bluetooth;
 
 import java.util.UUID;
 

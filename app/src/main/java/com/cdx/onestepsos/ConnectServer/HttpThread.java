@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.ConnectServer;
 
 import android.util.Log;
 
@@ -9,28 +9,49 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by CDX on 2017/4/26.
  */
 
 public class HttpThread extends Thread{
-    String url;
-    String fileName;
+    public static int UPLOAD_SETTING_INFORMATION = 0;
+    public static int UPLOAD_LOCATION = 1;
+    public static int UPLOAD_PHOTOS = 2;
 
-    public HttpThread(String url){
+    private int uploadType;
+    private double longitude;
+    private double latitude;
+    private String url;
+    private String fileName;
+    private String content;
+    public HttpThread(String url,double longitude,double latitude,int uploadType){
         this.url = url;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.uploadType = uploadType;
     }
+    public HttpThread(String url,String content){
+        this.url = url;
+        this.content = content;
+    }
+
+    public HttpThread(String url,String fileName,int uploadType){
+        this.url = url;
+        this.fileName = fileName;
+        this.uploadType = uploadType;
+    }
+
 
     private void doGet(){
         url = url+"?latitude="+"";
         try {
             URL httpUrl = new URL(url);
-            HttpsURLConnection conn = (HttpsURLConnection) httpUrl.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(5000);
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -48,21 +69,24 @@ public class HttpThread extends Thread{
     private void doPost(){
         try {
             URL httpUrl = new URL(url);
-            HttpsURLConnection conn = (HttpsURLConnection) httpUrl.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
             OutputStream out = conn.getOutputStream();
-            String content = null;
             out.write(content.getBytes());
+
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuffer sb = new StringBuffer();
             String str;
             while((str = reader.readLine())!= null){
                 sb.append(str);
             }
+            Log.i("CDX",sb.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            Log.i("CDX","MalformedURLException e");
         } catch (IOException e) {
+            Log.i("CDX","IOException e");
             e.printStackTrace();
         }
     }
@@ -74,7 +98,7 @@ public class HttpThread extends Thread{
 
         try {
             URL httpUrl = new URL(url);
-            HttpsURLConnection conn = (HttpsURLConnection) httpUrl.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);
@@ -82,7 +106,7 @@ public class HttpThread extends Thread{
 
             DataOutputStream out = new DataOutputStream(conn.getOutputStream());
             out.writeBytes(prefix+boundary+end);
-            out.writeBytes("Content-Disposition:form-data;"+"name=\"file\";filename=\""+"Sky.jpg"+"\""+end);
+            out.writeBytes("Content-Disposition:form-data;"+"name=\"file\";file=\""+"Sky.jpg"+"\""+end);
             out.writeBytes(end);
 
             FileInputStream fileInputStream = new FileInputStream(new File(fileName));
@@ -117,6 +141,7 @@ public class HttpThread extends Thread{
     }
     @Override
     public void run() {
-        super.run();
+       // upLoadPicture();
+        doPost();
     }
 }

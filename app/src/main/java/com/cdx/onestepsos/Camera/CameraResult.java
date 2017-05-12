@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Camera;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
 import android.widget.ImageView;
+
+import com.cdx.onestepsos.R;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

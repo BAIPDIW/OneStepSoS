@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Camera;
 
 
 import android.content.Intent;
@@ -15,7 +15,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-
+import com.cdx.onestepsos.R;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -44,10 +44,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 FileOutputStream fos = new FileOutputStream(tempFile);
                 fos.write(data);
                 fos.close();
-               // Intent intent = new Intent(CameraActivity.this, CameraResult.class);
-                //intent.putExtra("picPath", tempFile.getAbsolutePath());
-                //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                //startActivity(intent);
                 if(cameraPosition == 1){//后置拍照
                     picPathBundle.putString("picPathBack",tempFile.getAbsolutePath());
                 }else if(cameraPosition == 0){//前置拍照
@@ -79,13 +75,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.camera_activity);
         tv_camera_show_time = (TextView) findViewById(R.id.tv_camera_show_time);
         mPreview = (SurfaceView) findViewById(R.id.preview);
         mHolder = mPreview.getHolder();
         cameraCount = Camera.getNumberOfCameras();
-        Log.i("CDX","摄像头个数"+Camera.getNumberOfCameras()+"");
         mHolder.addCallback(this);
         handler = new Handler();
         mPreview.setOnClickListener(new View.OnClickListener() {
@@ -102,7 +96,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 tv_camera_show_time.setText((String)msg.obj);
             }
         };
-
         thread = new Thread(runnable);
         thread.start();
 
@@ -143,7 +136,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                   // mCamera.startPreview();//开始预览
                     setStartPreview(mCamera, mHolder);
                     cameraPosition = 0;
                     break;
@@ -159,7 +151,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    //mCamera.startPreview();//开始预览
                     setStartPreview(mCamera, mHolder);
                     cameraPosition = 1;
                     break;
@@ -169,7 +160,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     }
     public void capture() {
-        Log.i("CDX","capture");
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPictureFormat(ImageFormat.JPEG);
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);

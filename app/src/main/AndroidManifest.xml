@@ -8,14 +8,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
-
-        </activity>
-        <activity android:name=".CameraActivity"
+        <activity android:name=".Camera.CameraActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
-        <activity android:name=".CameraResult" />
-        <activity android:name=".UiActivity"
+        <activity android:name=".Camera.CameraResult" />
+        <activity android:name=".Surface.UiActivity"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +21,7 @@
 
 
         <service android:name="com.amap.api.location.APSService"></service>
-        <service android:name=".BluetoothServerService"></service>
+        <service android:name=".Bluetooth.BluetoothServerService"></service>
     </application>
 
     <!--用于进行网络定位-->
@@ -59,6 +55,13 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"></uses-permission>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+
+    <!-- 获取读取通讯录记录的权限 -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <meta-data
         android:name="com.amap.api.v2.apikey"

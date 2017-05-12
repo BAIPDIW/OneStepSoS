@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.MessageAndDial;
 import android.telephony.SmsManager;
 import java.util.List;
 

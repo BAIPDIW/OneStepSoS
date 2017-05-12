@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Bluetooth;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+
+import com.cdx.onestepsos.Surface.UiActivity;
 
 /**
  * Created by CDX on 2017/3/28.

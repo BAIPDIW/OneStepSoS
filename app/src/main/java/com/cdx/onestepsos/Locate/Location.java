@@ -1,4 +1,4 @@
-package com.cdx.onestepsos;
+package com.cdx.onestepsos.Locate;
 
 import android.content.Context;
 import android.os.Bundle;
