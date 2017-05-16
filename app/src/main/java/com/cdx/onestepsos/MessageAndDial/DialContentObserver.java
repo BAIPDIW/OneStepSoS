@@ -19,6 +19,10 @@ public class DialContentObserver extends ContentObserver {
     Context context;
     Handler handler;
     Long startTime;
+    private String mobile;
+    public void SetMobile(String mobile){
+        this.mobile = mobile;
+    }
     public DialContentObserver(Context context,Handler handler,Long startTime) {
         super(handler);
         this.context = context;
@@ -31,7 +35,7 @@ public class DialContentObserver extends ContentObserver {
         super.onChange(selfChange);
         DialAccept dialAccept = new DialAccept(context,startTime);
         Message msg = handler.obtainMessage();
-        if(dialAccept.isAccept("18850043013")){
+        if(dialAccept.isAccept(mobile)){
             Log.i("CDX","已接通");
             msg.what = 1;
         }else{

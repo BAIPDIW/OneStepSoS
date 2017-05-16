@@ -41,14 +41,20 @@ public class Location {
             tv_location.setTextSize(10);
             if(flag){
                 //一次定位成功,进度切换
+
                 Message message = handler.obtainMessage();
                 Bundle bundle = new Bundle();
-                bundle.putString("经度",aMapLocation.getLongitude()+"");
-                bundle.putString("纬度",aMapLocation.getLatitude()+"");
-                bundle.putString("地点",aMapLocation.getAddress());
-                message.setData(bundle);
-                message.what = 1;
-                message.sendToTarget();
+                if(aMapLocation.getErrorCode() == 0) {
+                    bundle.putString("经度", aMapLocation.getLongitude() + "");
+                    bundle.putString("纬度", aMapLocation.getLatitude() + "");
+                    bundle.putString("地点", aMapLocation.getAddress());
+                    message.setData(bundle);
+                    message.what = 1;
+                    message.sendToTarget();
+                }else{
+                    message.what = 2;
+                    message.sendToTarget();
+                }
 
             }
             flag = false;

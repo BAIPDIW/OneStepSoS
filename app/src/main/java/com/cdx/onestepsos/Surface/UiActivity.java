@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.CallLog;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -54,6 +55,7 @@ public class UiActivity extends Activity {
     private String latitute;
     private Long startTime;
     int dialCount;
+    DialContentObserver dialContentObserver;
     private boolean isDialed;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -107,7 +109,12 @@ public class UiActivity extends Activity {
                     dialCount = 0;
                     ArrayList<Contact> contacts = getContacts();
                     dial.call(contacts.get(dialCount).getMobile());
-                    getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI,true,new DialContentObserver(UiActivity.this,new myHandler(),startTime));
+                    dialContentObserver = new DialContentObserver(UiActivity.this,new myHandler(),startTime);
+                    dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
+                    getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI,true,dialContentObserver);
+                    break;
+                case "SMS_SEND_SUCCESS":
+                    Log.i("CDX","短信发送成功");
                     break;
             }
         }
@@ -117,14 +124,15 @@ public class UiActivity extends Activity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch(msg.what){
-                case 0:
+                case 0://拨打电话未接通
                     ArrayList<Contact> contacts = getContacts();
                     Dial dial = new Dial(UiActivity.this);
-                    if(dialCount < contacts.size()) {
-                        dial.call(contacts.get(++dialCount).getMobile());
+                    if(++dialCount < contacts.size()) {
+                        dial.call(contacts.get(dialCount).getMobile());
+                        dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
                     }
                     break;
-                case 1:
+                case 1://拨打电话接通
 
                     break;
             }
@@ -162,6 +170,7 @@ public class UiActivity extends Activity {
         intentFilter.addAction(BluetoothTools.ACTION_CONNECT_SUCCESS);
         intentFilter.addAction("SOS");
         intentFilter.addAction("ALL_COMPLETE_START_DIAL");
+        intentFilter.addAction("SMS_SEND_SUCCESS");
         registerReceiver(broadcastReceiver, intentFilter);
 
         isDialed = false;
