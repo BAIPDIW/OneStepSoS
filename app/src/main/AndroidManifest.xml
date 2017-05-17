@@ -10,7 +10,6 @@
         android:theme="@style/AppTheme">
         <activity android:name=".Camera.CameraActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
-        <activity android:name=".Camera.CameraResult" />
         <activity android:name=".Surface.UiActivity"
             android:launchMode="singleTask">
             <intent-filter>
@@ -21,7 +20,7 @@
 
 
         <service android:name="com.amap.api.location.APSService"></service>
-        <service android:name=".Bluetooth.BluetoothServerService"></service>
+        <service android:name=".Bluetooth.MyServerService"/>
     </application>
 
     <!--用于进行网络定位-->

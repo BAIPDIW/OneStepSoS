@@ -24,8 +24,8 @@
             android:id="@+id/btn_sos"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:text="SOS"
-            android:textSize="45dp"
+            android:text="点击求救"
+            android:textSize="43dp"
             android:textColor="#ffffff"
             android:layout_centerInParent="true"
             android:background="@drawable/button_style"/>

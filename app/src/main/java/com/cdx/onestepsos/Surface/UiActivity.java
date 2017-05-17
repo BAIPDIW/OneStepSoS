@@ -26,8 +26,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.cdx.onestepsos.Bluetooth.BluetoothServerService;
-import com.cdx.onestepsos.Bluetooth.BluetoothTools;
+import com.cdx.onestepsos.Bluetooth.MyServerService;
 import com.cdx.onestepsos.ConnectServer.HttpConnectionThread;
 import com.cdx.onestepsos.MessageAndDial.Dial;
 import com.cdx.onestepsos.MessageAndDial.DialContentObserver;
@@ -63,13 +62,7 @@ public class UiActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             switch (action) {
-                case BluetoothTools.ACTION_CONNECT_SUCCESS:
-                    img_bluetooth_state.setImageResource(R.drawable.gou);
-                    tv_bluetooth_state.setText("已连接");
-                    tv_bluetooth_state.setTextColor(Color.GREEN);
-                    speech.TextToSpeech("蓝牙已连接");
-                    break;
-                case BluetoothTools.ACTION_DATA_TO_GAME:
+                case "SIGN_SOS_FROM_CLIENT":
                     startTime = System.currentTimeMillis();
                     speech.TextToSpeech("请帮助我!!!请帮助我!!!");
                     img_bluetooth_state.setImageResource(R.drawable.gou);
@@ -108,10 +101,12 @@ public class UiActivity extends Activity {
                     Dial dial = new Dial(UiActivity.this);
                     dialCount = 0;
                     ArrayList<Contact> contacts = getContacts();
-                    dial.call(contacts.get(dialCount).getMobile());
-                    dialContentObserver = new DialContentObserver(UiActivity.this,new myHandler(),startTime);
-                    dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
-                    getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI,true,dialContentObserver);
+                    if(contacts.size() > 0) {
+                        dial.call(contacts.get(dialCount).getMobile());
+                        dialContentObserver = new DialContentObserver(UiActivity.this, new myHandler(), startTime);
+                        dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
+                        getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI, true, dialContentObserver);
+                    }
                     break;
                 case "SMS_SEND_SUCCESS":
                     Log.i("CDX","短信发送成功");
@@ -161,16 +156,15 @@ public class UiActivity extends Activity {
         transaction.replace(R.id.fragmentlayout, contactsFragment);
         transaction.commit();
         //开启蓝牙服务
-        Intent intent = new Intent(UiActivity.this, BluetoothServerService.class);
+        Intent intent = new Intent(UiActivity.this,MyServerService.class);
         startService(intent);
 
         //广播接收
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothTools.ACTION_DATA_TO_GAME);
-        intentFilter.addAction(BluetoothTools.ACTION_CONNECT_SUCCESS);
         intentFilter.addAction("SOS");
         intentFilter.addAction("ALL_COMPLETE_START_DIAL");
         intentFilter.addAction("SMS_SEND_SUCCESS");
+        intentFilter.addAction("SIGN_SOS_FROM_CLIENT");
         registerReceiver(broadcastReceiver, intentFilter);
 
         isDialed = false;
