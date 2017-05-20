@@ -2,6 +2,7 @@ package com.cdx.onestepsos.MessageAndDial;
 
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -37,6 +38,9 @@ public class DialContentObserver extends ContentObserver {
         Message msg = handler.obtainMessage();
         if(dialAccept.isAccept(mobile)){
             Log.i("CDX","已接通");
+            Bundle bundle = new Bundle();
+            bundle.putString("mobile",mobile);
+            msg.setData(bundle);
             msg.what = 1;
         }else{
             Log.i("CDX","未接通");

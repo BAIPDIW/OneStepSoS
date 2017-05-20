@@ -18,9 +18,6 @@ import android.widget.RadioGroup;
 import com.cdx.onestepsos.ConnectServer.HttpConnectionThread;
 import com.cdx.onestepsos.R;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import static android.content.Context.TELEPHONY_SERVICE;
 
 /**
@@ -30,11 +27,9 @@ import static android.content.Context.TELEPHONY_SERVICE;
 public class UserInformationDialog extends Dialog implements View.OnClickListener{
     private EditText et_user_information_mobile;
     private EditText et_user_information_name;
-    private EditText et_user_information_gender;
     private EditText et_user_information_age;
     private EditText et_user_information_default_location;
     private EditText et_user_information_medical_history;
-
     private RadioGroup rg_gender;
     private RadioButton rb_gender_male;
     private RadioButton rb_gender_female;
@@ -42,7 +37,6 @@ public class UserInformationDialog extends Dialog implements View.OnClickListene
     private Button btn_user_information_save;
     private Button btn_user_information_cancel;
     private Activity context;
-
     private boolean register;
     public UserInformationDialog(Activity context) {
         super(context);
@@ -133,23 +127,21 @@ public class UserInformationDialog extends Dialog implements View.OnClickListene
                 }
                 String default_location = et_user_information_default_location.getText().toString();
                 String medical_history = et_user_information_medical_history.getText().toString();
-                if(!register){
+                //if(!register){
                     TelephonyManager TelephonyMgr = (TelephonyManager)context.getSystemService(TELEPHONY_SERVICE);
                     String IEMI = TelephonyMgr.getDeviceId();
                     Log.i("CDX","IEMI = "+IEMI);
                     String content = null;
-                    try {
-                        content = "ID="+IEMI+"&number="+mobile+"&Name="+ URLEncoder.encode(name,"utf-8")+"&Gender="+gender+"&Age="+age+"&Address="+default_location
+
+                    content = "ID="+IEMI+"&Number="+mobile+"&Name="+name+"&Gender="+gender+"&Age="+age+"&Address="+default_location
                                 +"&MedicalHistory="+medical_history;
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
+
                     HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.USER_REGISTER);
                     thread.start();
-                }else{
+              //  }else{
 
 
-                }
+               // }
                 editor.putString("mobile",mobile);
                 editor.putString("name",name);
                 editor.putString("age",age);

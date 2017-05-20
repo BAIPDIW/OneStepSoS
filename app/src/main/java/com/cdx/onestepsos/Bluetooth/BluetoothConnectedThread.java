@@ -14,14 +14,14 @@ import java.util.UUID;
  * Created by CDX on 2017/5/17.
  */
 
-public class MyConnectedThread extends Thread{
+public class BluetoothConnectedThread extends Thread{
     public static final UUID PRIVATE_UUID = UUID.fromString("0f3561b9-bda5-4672-84ff-ab1f98e349b6");
     private Handler serviceHandler;		//用于同Service通信的Handler
     private BluetoothAdapter adapter;
     private BluetoothSocket socket;		//用于通信的Socket
     private BluetoothServerSocket serverSocket;
-    public MyConnectedThread(Handler handler){
-        Log.i("CDX","MyConnectedThread");
+    public BluetoothConnectedThread(Handler handler){
+        Log.i("CDX","BluetoothConnectedThread");
         this.serviceHandler = handler;
         adapter = BluetoothAdapter.getDefaultAdapter();
         if(!adapter.isEnabled()){

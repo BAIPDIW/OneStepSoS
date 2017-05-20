@@ -41,7 +41,6 @@ public class Location {
             tv_location.setTextSize(10);
             if(flag){
                 //一次定位成功,进度切换
-
                 Message message = handler.obtainMessage();
                 Bundle bundle = new Bundle();
                 if(aMapLocation.getErrorCode() == 0) {

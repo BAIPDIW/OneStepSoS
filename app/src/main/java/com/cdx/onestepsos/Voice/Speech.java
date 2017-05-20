@@ -53,5 +53,4 @@ public class Speech {
         //会话事件回调接口
         public void onEvent(int arg0, int arg1, int arg2, Bundle arg3) {}
     };
-
 }

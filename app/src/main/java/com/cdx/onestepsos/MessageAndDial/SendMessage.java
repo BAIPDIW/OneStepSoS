@@ -27,6 +27,7 @@ public class SendMessage {
     public void Send() {
         Intent itSend = new Intent("SMS_SEND_SUCCESS");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, itSend, 0);
+
         if (content.length() > 70) {
             List<String> contents = smsManager.divideMessage(content);
             for (String sms : contents) {

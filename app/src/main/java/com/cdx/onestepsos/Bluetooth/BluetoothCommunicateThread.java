@@ -13,7 +13,7 @@ import java.io.ObjectInputStream;
  * Created by CDX on 2017/5/17.
  */
 
-public class MyCommunicateThread extends Thread {
+public class BluetoothCommunicateThread extends Thread {
     private Handler serviceHandler;        //与Service通信的Handler
     private BluetoothSocket socket;
     private ObjectInputStream inStream;        //对象输入流
@@ -24,7 +24,7 @@ public class MyCommunicateThread extends Thread {
      * @param handler 用于接收消息
      * @param socket
      */
-    public MyCommunicateThread(Handler handler, BluetoothSocket socket) {
+    public BluetoothCommunicateThread(Handler handler, BluetoothSocket socket) {
         this.serviceHandler = handler;
         this.socket = socket;
     }

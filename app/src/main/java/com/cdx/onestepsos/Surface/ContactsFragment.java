@@ -4,12 +4,14 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cdx.onestepsos.ConnectServer.HttpConnectionThread;
 import com.cdx.onestepsos.R;
 import com.cdx.onestepsos.Setting.AddContactDialog;
 import com.cdx.onestepsos.Setting.AddContactFromPhoneDialog;
@@ -82,6 +85,11 @@ public class ContactsFragment extends Fragment implements View.OnClickListener{
                                 //Log.i("CDX",contact.getMobile());
                                 db.delete("contactstb","_mobile = ?",new String[] {contact.getMobile()});
                                 db.close();
+                                TelephonyManager tm2 = (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+                                String content = "ID="+ tm2.getDeviceId()+"&HelpCall="+contact.getMobile();
+                                HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.DELETE_HELP_CALL);
+                                thread.start();
+
                                 listViewContactAdapter.setContacts(getContacts());
                                 if(getContacts().size() == 0) {
                                     tv_request_add_contacts.setVisibility(View.VISIBLE);
@@ -91,7 +99,6 @@ public class ContactsFragment extends Fragment implements View.OnClickListener{
                                     tv_request_add_contacts.setVisibility(View.GONE);
                                 }
                                 listViewContactAdapter.notifyDataSetChanged();
-
                                 break;
                         }
                     }
@@ -173,6 +180,11 @@ public class ContactsFragment extends Fragment implements View.OnClickListener{
                             db.execSQL(ContactsFragment.CREATETABLE);
                             db.insert("contactstb", null, values);
                             db.close();
+                            TelephonyManager tm2 = (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+                            String content = "ID="+ tm2.getDeviceId()+"&HelpCall="+mobile;
+                            HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.UPLOAD_HELP_CALL);
+                            thread.start();
+
                             listViewContactAdapter.setContacts(getContacts());
                             if(getContacts().size() == 0) {
                                 ll_contacts.setVisibility(View.GONE);
@@ -189,6 +201,7 @@ public class ContactsFragment extends Fragment implements View.OnClickListener{
                         Toast.makeText(getActivity(), "紧急联系人信息不能为空请重新输入", Toast.LENGTH_LONG).show();
                     }
                 }
+                break;
             case R.id.btn_add_contacts_from_phone_confirm:
                 if(addContactFromPhoneDialog != null) {
                     HashMap<Integer, Boolean> isSelected = ListViewAddContactsAdapter.getIsSelected();
@@ -210,6 +223,11 @@ public class ContactsFragment extends Fragment implements View.OnClickListener{
                                 values.put("_mobile", contacts.get(i).getMobile());
                                 values.put("name", contacts.get(i).getName());
                                 db.insert("contactstb", null, values);
+                                TelephonyManager tm2 = (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+                                String content = "ID="+ tm2.getDeviceId()+"&HelpCall="+contacts.get(i).getMobile();
+                                HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.UPLOAD_HELP_CALL);
+                                thread.start();
+
                             }else{
                                 Log.i("CDX","已存在");
                                 continue;

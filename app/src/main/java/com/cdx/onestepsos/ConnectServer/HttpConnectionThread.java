@@ -27,8 +27,9 @@ public class HttpConnectionThread extends Thread{
     public static final int USER_REVISE = 2;
     public static final int UPLOAD_LOCATION = 3;
     public static final int UPLOAD_PHOTO = 4;
-    public static final int UPLOAD_OPERATION_RECORD = 5;
+    public static final int UPLOAD_HELP_CALL = 5;
     public static final int STOP = 6;
+    public static final int DELETE_HELP_CALL = 7;
 
     private String fileName;
     private String content;
@@ -39,10 +40,11 @@ public class HttpConnectionThread extends Thread{
         this.content = content;
         this.type = type;
     }
-    public HttpConnectionThread(String ID,String fileName){
+    public HttpConnectionThread(String ID,String fileName,Handler handler){
         this.ID = ID;
         this.fileName = fileName;
         this.type = UPLOAD_PHOTO;
+        this.handler = handler;
     }
     public HttpConnectionThread(String content,Handler handler,int type){
         this.content = content;
@@ -54,32 +56,32 @@ public class HttpConnectionThread extends Thread{
         Properties pro = System.getProperties();
         pro.list(System.out);
         try {
-            URL httpUrl = new URL("http://123.207.41.253:8999/webHC/userRegister");
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/userRegister");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
             OutputStream out = conn.getOutputStream();
             out.write(content.getBytes());
-
+            Log.i("CDX",content);
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuffer sb = new StringBuffer();
             String str;
             while ((str = reader.readLine()) != null) {
                 sb.append(str);
             }
-            Log.i("CDX", "userregister的返回值:  "+sb.toString());
+            Log.i("CDX", "userregister:  "+ sb.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            Log.i("CDX", "MalformedURLException e");
+            Log.i("CDX", "userregister: MalformedURLException e");
         } catch (IOException e) {
-            Log.i("CDX", "IOException e");
+            Log.i("CDX", "userregister: IOException e");
             e.printStackTrace();
         }
     }
 
     public String userLog(){
         try {
-            URL httpUrl = new URL("http://123.207.41.253:8999/webHC/userLog");
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/userLog");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
@@ -106,7 +108,7 @@ public class HttpConnectionThread extends Thread{
 
     public void UserRevise(){
         try {
-            URL httpUrl = new URL("http://123.207.41.253:8999/webHC/UserRevise");
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/UserRevise");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
@@ -130,7 +132,7 @@ public class HttpConnectionThread extends Thread{
     }
     public void uploadLocation(){
         try {
-            URL httpUrl = new URL("http://123.207.41.253:8999/webHC/uploadLocation");
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/uploadLocation");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
@@ -159,7 +161,7 @@ public class HttpConnectionThread extends Thread{
         String end = "\r\n";
 
         try {
-            URL httpUrl = new URL("http://123.207.41.253:8999/webHC/uploadPhoto");
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/uploadPhoto");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
@@ -189,6 +191,7 @@ public class HttpConnectionThread extends Thread{
             }
 
             Log.i("CDX","uploadphoto    "+sb.toString());
+            handler.obtainMessage(2).sendToTarget();
             if(out != null){
                 out.close();
             }
@@ -206,7 +209,7 @@ public class HttpConnectionThread extends Thread{
 
     public void httpstop(){
         try {
-            URL httpUrl = new URL("http://123.207.41.253:8999/webHC/uploadLocation");
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/stop");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
@@ -222,15 +225,60 @@ public class HttpConnectionThread extends Thread{
             Log.i("CDX", "stop   "+ sb.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            Log.i("CDX", "MalformedURLException e");
+            Log.i("CDX", "stop   MalformedURLException e");
         } catch (IOException e) {
-            Log.i("CDX", "IOException e");
+            Log.i("CDX", "stop   IOException e");
+            e.printStackTrace();
+        }
+    }
+    public void deleteHelpCall(){
+        try {
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/delete");
+            HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(5000);
+            OutputStream out = conn.getOutputStream();
+            out.write(content.getBytes());
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuffer sb = new StringBuffer();
+            String str;
+            while ((str = reader.readLine()) != null) {
+                sb.append(str);
+            }
+            Log.i("CDX", "deleteHelpCall   "+ sb.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            Log.i("CDX", "deleteHelpCall MalformedURLException e");
+        } catch (IOException e) {
+            Log.i("CDX", "deleteHelpCall IOException e");
             e.printStackTrace();
         }
     }
 
-    public void uploadOperationRecord(){
-
+    public void upLoadHelpCall(){
+        try {
+            Log.i("CDX",content);
+            URL httpUrl = new URL("http://119.29.219.15:8080/webHC/upLoadHelpCall");
+            HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(5000);
+            OutputStream out = conn.getOutputStream();
+            out.write(content.getBytes());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuffer sb = new StringBuffer();
+            String str;
+            while ((str = reader.readLine()) != null) {
+                sb.append(str);
+            }
+            Log.i("CDX", "uploadHelpCall   "+ sb.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            Log.i("CDX", "uploadHelpCall MalformedURLException e");
+        } catch (IOException e) {
+            Log.i("CDX", "uploadHelpCall IOException  a");
+            e.printStackTrace();
+        }
     }
     @Override
     public void run() {
@@ -255,11 +303,14 @@ public class HttpConnectionThread extends Thread{
             case UPLOAD_PHOTO:
                 uploadPhoto();
                 break;
-            case UPLOAD_OPERATION_RECORD:
-                uploadOperationRecord();
+            case UPLOAD_HELP_CALL:
+                upLoadHelpCall();
                 break;
             case STOP:
                 httpstop();
+                break;
+            case DELETE_HELP_CALL:
+                deleteHelpCall();
                 break;
         }
     }
@@ -272,6 +323,5 @@ public class HttpConnectionThread extends Thread{
         }else{
             return null;
         }
-
     }
 }

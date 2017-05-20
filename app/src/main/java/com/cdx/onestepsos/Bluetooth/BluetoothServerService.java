@@ -19,7 +19,7 @@ import com.cdx.onestepsos.Surface.UiActivity;
  * Created by CDX on 2017/5/17.
  */
 
-public class MyServerService extends Service{
+public class BluetoothServerService extends Service{
 
     //蓝牙适配器
     private final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -32,12 +32,12 @@ public class MyServerService extends Service{
     }
 
     public void onCreate() {
-        Log.i("CDX","MyServerService is on create");
+        Log.i("CDX","BluetoothServerService is on create");
         if(!bluetoothAdapter.isEnabled()) {
             bluetoothAdapter.enable();
         }
         handler = new Handler();
-        new MyConnectedThread(serviceHandler).start();
+        new BluetoothConnectedThread(serviceHandler).start();
         super.onCreate();
         IntentFilter intentFilter = new IntentFilter(BluetoothAdapter.EXTRA_STATE);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -49,7 +49,6 @@ public class MyServerService extends Service{
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,-1);
             switch(state){
                 case BluetoothAdapter.STATE_TURNING_OFF:
-
                     break;
                 case BluetoothAdapter.STATE_OFF:
                     if(!bluetoothAdapter.isEnabled()) {
@@ -57,10 +56,9 @@ public class MyServerService extends Service{
                     }
                     break;
                 case BluetoothAdapter.STATE_TURNING_ON:
-
                     break;
                 case BluetoothAdapter.STATE_ON:
-                    new MyConnectedThread(serviceHandler).start();
+                    new BluetoothConnectedThread(serviceHandler).start();
                     break;
             }
 
@@ -76,11 +74,11 @@ public class MyServerService extends Service{
                     Log.i("CDX","连接出错");
                     break;
                 case 1:
-                    new MyCommunicateThread(serviceHandler, (BluetoothSocket)msg.obj).start();
+                    new BluetoothCommunicateThread(serviceHandler, (BluetoothSocket)msg.obj).start();
                    break;
                 case 2://收到求救信号
                     Log.i("CDX","收到求救信号");
-                    new MyConnectedThread(serviceHandler).start();
+                    new BluetoothConnectedThread(serviceHandler).start();
                     Intent intent1 = new Intent(getBaseContext(),UiActivity.class);
                     intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent1);

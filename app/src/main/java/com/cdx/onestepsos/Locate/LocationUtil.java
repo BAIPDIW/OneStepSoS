@@ -11,13 +11,6 @@ import java.util.Locale;
  */
 
 public class LocationUtil {
-
-    public final static int MSG_LOCATION_START = 0;  //开始定位
-
-    public final static int MSG_LOCATION_FINISH = 1; //定位完成
-
-    public final static int MSG_LOCATION_STOP= 2;    //停止定位
-
     /**
      *根据定位结果返回定位信息的字符串
      * @param location

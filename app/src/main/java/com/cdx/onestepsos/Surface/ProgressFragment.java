@@ -33,7 +33,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by CDX on 2017/4/15.
  */
 
-public class ProgressFragement extends Fragment {
+public class ProgressFragment extends Fragment {
     private ImageView img_location;
     private ImageView img_send_message;
     private ImageView img_photo;

@@ -23,11 +23,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.cdx.onestepsos.Bluetooth.MyServerService;
+import com.cdx.onestepsos.Bluetooth.BluetoothServerService;
 import com.cdx.onestepsos.ConnectServer.HttpConnectionThread;
+import com.cdx.onestepsos.ConnectServer.NetworkUtil;
 import com.cdx.onestepsos.MessageAndDial.Dial;
 import com.cdx.onestepsos.MessageAndDial.DialContentObserver;
 import com.cdx.onestepsos.R;
@@ -44,16 +43,16 @@ import java.util.ArrayList;
 public class UiActivity extends Activity {
     private Button btn_sos;
     private ImageButton imgbtn_user_settnig;
-    private ImageView img_bluetooth_state;
-    private TextView tv_bluetooth_state;
-    private ProgressFragement progressFragement;
+    private ProgressFragment progressFragment;
     private ContactsFragment contactsFragment;
     private boolean isContactsFragment = true;
     private Speech speech;
-    private String longtitute;
-    private String latitute;
     private Long startTime;
+    private NetworkUtil networkUtil;
+    private boolean isNetwork = true;
     int dialCount;
+    int photoCount ;
+    int sendPhotoCount;
     DialContentObserver dialContentObserver;
     private boolean isDialed;
 
@@ -65,13 +64,10 @@ public class UiActivity extends Activity {
                 case "SIGN_SOS_FROM_CLIENT":
                     startTime = System.currentTimeMillis();
                     speech.TextToSpeech("请帮助我!!!请帮助我!!!");
-                    img_bluetooth_state.setImageResource(R.drawable.gou);
-                    tv_bluetooth_state.setText("已连接");
-                    tv_bluetooth_state.setTextColor(Color.GREEN);
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
-                    progressFragement = new ProgressFragement();
-                    transaction.replace(R.id.fragmentlayout, progressFragement);
+                    progressFragment = new ProgressFragment();
+                    transaction.replace(R.id.fragmentlayout, progressFragment);
                     if (isContactsFragment) {
                         transaction.addToBackStack(null);
                         isContactsFragment = false;
@@ -80,14 +76,17 @@ public class UiActivity extends Activity {
                         transaction.disallowAddToBackStack();
                     }
                     transaction.commitAllowingStateLoss();
+                    //startService(new Intent(UiActivity.this, SpeechService.class));
+                    isNetwork = networkUtil.isNetwork(UiActivity.this);
+
                     break;
                 case "SOS":
-                    speech.TextToSpeech("请帮助我!!!请帮助我!!!");
+                   // speech.TextToSpeech("请帮助我!!!请帮助我!!!");
                     startTime = System.currentTimeMillis();
                     FragmentManager fm2 = getFragmentManager();
                     FragmentTransaction transaction2 = fm2.beginTransaction();
-                    progressFragement = new ProgressFragement();
-                    transaction2.replace(R.id.fragmentlayout, progressFragement);
+                    progressFragment = new ProgressFragment();
+                    transaction2.replace(R.id.fragmentlayout, progressFragment);
                     if (isContactsFragment) {
                         transaction2.addToBackStack(null);
                         isContactsFragment = false;
@@ -96,6 +95,9 @@ public class UiActivity extends Activity {
                         transaction2.disallowAddToBackStack();
                     }
                     transaction2.commitAllowingStateLoss();
+                    isNetwork = networkUtil.isNetwork(UiActivity.this);
+
+                   // startService(new Intent(UiActivity.this, SpeechService.class));
                     break;
                 case "ALL_COMPLETE_START_DIAL":
                     Dial dial = new Dial(UiActivity.this);
@@ -106,11 +108,15 @@ public class UiActivity extends Activity {
                         dialContentObserver = new DialContentObserver(UiActivity.this, new myHandler(), startTime);
                         dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
                         getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI, true, dialContentObserver);
+                    }else {
+                        sendBroadcast(new Intent("STOP_SPEECH"));
                     }
                     break;
                 case "SMS_SEND_SUCCESS":
                     Log.i("CDX","短信发送成功");
+                   // sendBroadcast(new Intent(SpeechService.SMS_COMPLETED));
                     break;
+
             }
         }
     };
@@ -125,10 +131,30 @@ public class UiActivity extends Activity {
                     if(++dialCount < contacts.size()) {
                         dial.call(contacts.get(dialCount).getMobile());
                         dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
+                    }else{
+                        TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+                        String content = "ID="+tm.getDeviceId()+"&Phone="+"0"+"&Message="+"1";
+                        HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.STOP);
+                        thread.start();
+
+                       // sendBroadcast(new Intent("STOP_SPEECH"));
                     }
                     break;
                 case 1://拨打电话接通
+                    Bundle bundle = msg.getData();
+                    TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+                    String content = "ID="+tm.getDeviceId()+"&Phone="+bundle.get("mobile").toString()+"&Message"+"1";
+                    HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.STOP);
+                    thread.start();
 
+                    //sendBroadcast(new Intent("STOP_SPEECH"));
+                    break;
+                case 2:
+                    sendPhotoCount += 1;
+                    if(sendPhotoCount == photoCount){
+                        Intent intent = new Intent("ALL_COMPLETE_START_DIAL");
+                        sendBroadcast(intent);
+                    }
                     break;
             }
         }
@@ -142,7 +168,6 @@ public class UiActivity extends Activity {
             isContactsFragment = true;
         }
         return super.onKeyDown(keyCode, event);
-
     }
 
 
@@ -156,7 +181,7 @@ public class UiActivity extends Activity {
         transaction.replace(R.id.fragmentlayout, contactsFragment);
         transaction.commit();
         //开启蓝牙服务
-        Intent intent = new Intent(UiActivity.this,MyServerService.class);
+        Intent intent = new Intent(UiActivity.this,BluetoothServerService.class);
         startService(intent);
 
         //广播接收
@@ -166,10 +191,8 @@ public class UiActivity extends Activity {
         intentFilter.addAction("SMS_SEND_SUCCESS");
         intentFilter.addAction("SIGN_SOS_FROM_CLIENT");
         registerReceiver(broadcastReceiver, intentFilter);
-
+        networkUtil = new NetworkUtil();
         isDialed = false;
-        img_bluetooth_state = (ImageView) findViewById(R.id.img_bluetooth_state);
-        tv_bluetooth_state = (TextView) findViewById(R.id.tv_bluetooth_state);
         btn_sos = (Button) findViewById(R.id.btn_sos);
         btn_sos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,22 +229,30 @@ public class UiActivity extends Activity {
             Bundle bundle = data.getBundleExtra("picPath");
             String pic1 = bundle.getString("picPathBack");
             String pic2 = bundle.getString("picPathFront");
-            progressFragement.setImg_photo();
+            progressFragment.setImg_photo();
             speech.TextToSpeech("拍照完成");
-
+          //  sendBroadcast(new Intent(SpeechService.SMS_COMPLETED));
+            photoCount = 0;
+            sendPhotoCount = 0;
+            if(pic1 != null){
+                photoCount += 1;
+            }
+            if(pic2 != null){
+                photoCount += 1;
+            }
             TelephonyManager tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-            SharedPreferences sp = getSharedPreferences("userinfo", Context.MODE_PRIVATE);
             if(pic1 != null) {
-                HttpConnectionThread thread = new HttpConnectionThread(tm.getDeviceId(), pic1);
+                HttpConnectionThread thread = new HttpConnectionThread(tm.getDeviceId(), pic1,new myHandler());
                 thread.start();
             }
             if(pic2 != null){
-                HttpConnectionThread thread = new HttpConnectionThread(tm.getDeviceId(), pic2);
+                HttpConnectionThread thread = new HttpConnectionThread(tm.getDeviceId(), pic2,new myHandler());
                 thread.start();
             }
-
-            Intent intent = new Intent("ALL_COMPLETE_START_DIAL");
-            sendBroadcast(intent);
+           if(!networkUtil.isNetwork(UiActivity.this)) {
+               Intent intent = new Intent("ALL_COMPLETE_START_DIAL");
+               sendBroadcast(intent);
+           }
         }
     }
 

@@ -20,7 +20,8 @@
 
 
         <service android:name="com.amap.api.location.APSService"></service>
-        <service android:name=".Bluetooth.MyServerService"/>
+        <service android:name=".Bluetooth.BluetoothServerService"/>
+        <service android:name=".Voice.SpeechService"/>
     </application>
 
     <!--用于进行网络定位-->
