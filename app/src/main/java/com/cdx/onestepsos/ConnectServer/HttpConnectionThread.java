@@ -106,7 +106,7 @@ public class HttpConnectionThread extends Thread{
         return null;
     }
 
-    public void UserRevise(){
+    public void userRevise(){
         try {
             URL httpUrl = new URL("http://119.29.219.15:8080/webHC/UserRevise");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
@@ -135,7 +135,7 @@ public class HttpConnectionThread extends Thread{
             URL httpUrl = new URL("http://119.29.219.15:8080/webHC/uploadLocation");
             HttpURLConnection conn = (HttpURLConnection) httpUrl.openConnection();
             conn.setRequestMethod("POST");
-            conn.setConnectTimeout(5000);
+           // conn.setConnectTimeout(5000);
             OutputStream out = conn.getOutputStream();
             out.write(content.getBytes());
 
@@ -189,7 +189,6 @@ public class HttpConnectionThread extends Thread{
             while( (str = reader.readLine())!=null){
                 sb.append(str);
             }
-
             Log.i("CDX","uploadphoto    "+sb.toString());
             handler.obtainMessage(2).sendToTarget();
             if(out != null){
@@ -295,7 +294,7 @@ public class HttpConnectionThread extends Thread{
                 msg.sendToTarget();
                 break;
             case USER_REVISE:
-                UserRevise();
+                userRevise();
                 break;
             case UPLOAD_LOCATION:
                 uploadLocation();

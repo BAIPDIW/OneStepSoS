@@ -15,11 +15,23 @@
             android:padding="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:src="@drawable/usersetting"
             android:background="#000000"
             />
+        <ImageButton
+            android:id="@+id/imgbtn_bluetooth_switch"
+            android:padding="5dp"
+            android:layout_alignBottom="@id/imgbtn_user_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/bluetooth_on"
+            android:background="#000000"
+            />
+
         <Button
             android:id="@+id/btn_sos"
             android:layout_width="120dp"

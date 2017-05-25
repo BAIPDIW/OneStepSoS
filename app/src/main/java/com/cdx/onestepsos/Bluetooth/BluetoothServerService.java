@@ -96,6 +96,7 @@ public class BluetoothServerService extends Service{
 
     @Override
     public void onDestroy() {
+        Log.i("CDX","BluetoothService onDestroy");
         super.onDestroy();
         unregisterReceiver(broadcastReceiver);
     }

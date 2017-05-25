@@ -3,6 +3,7 @@ package com.cdx.onestepsos.Surface;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import com.cdx.onestepsos.R;
 import com.cdx.onestepsos.Setting.Contact;
 import com.cdx.onestepsos.Setting.UserInformationDialog;
 import com.cdx.onestepsos.Voice.Speech;
+import com.cdx.onestepsos.Voice.SpeechService;
 
 import java.util.ArrayList;
 
@@ -50,12 +52,15 @@ public class UiActivity extends Activity {
     private Long startTime;
     private NetworkUtil networkUtil;
     private boolean isNetwork = true;
+    private boolean bluetoothServiceOn;
     int dialCount;
     int photoCount ;
     int sendPhotoCount;
+    private Intent speechIntent;
     DialContentObserver dialContentObserver;
     private boolean isDialed;
-
+    private String dialedNumber = null;
+    private ImageButton imgbtn_bluetooth_switch;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -63,7 +68,6 @@ public class UiActivity extends Activity {
             switch (action) {
                 case "SIGN_SOS_FROM_CLIENT":
                     startTime = System.currentTimeMillis();
-                    speech.TextToSpeech("请帮助我!!!请帮助我!!!");
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
                     progressFragment = new ProgressFragment();
@@ -76,7 +80,7 @@ public class UiActivity extends Activity {
                         transaction.disallowAddToBackStack();
                     }
                     transaction.commitAllowingStateLoss();
-                    //startService(new Intent(UiActivity.this, SpeechService.class));
+                    startService(speechIntent);
                     isNetwork = networkUtil.isNetwork(UiActivity.this);
 
                     break;
@@ -97,7 +101,7 @@ public class UiActivity extends Activity {
                     transaction2.commitAllowingStateLoss();
                     isNetwork = networkUtil.isNetwork(UiActivity.this);
 
-                   // startService(new Intent(UiActivity.this, SpeechService.class));
+                    startService(speechIntent);
                     break;
                 case "ALL_COMPLETE_START_DIAL":
                     Dial dial = new Dial(UiActivity.this);
@@ -108,13 +112,18 @@ public class UiActivity extends Activity {
                         dialContentObserver = new DialContentObserver(UiActivity.this, new myHandler(), startTime);
                         dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
                         getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI, true, dialContentObserver);
-                    }else {
-                        sendBroadcast(new Intent("STOP_SPEECH"));
                     }
                     break;
                 case "SMS_SEND_SUCCESS":
                     Log.i("CDX","短信发送成功");
-                   // sendBroadcast(new Intent(SpeechService.SMS_COMPLETED));
+                    break;
+                case "STOP_SOS":
+                    stopService(speechIntent);
+                    TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+                    String content = "ID="+tm.getDeviceId()+"&Phone="+dialedNumber+"&Message="+"1";
+                    HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.STOP);
+                    thread.start();
+                    dialedNumber = "0";
                     break;
 
             }
@@ -132,22 +141,15 @@ public class UiActivity extends Activity {
                         dial.call(contacts.get(dialCount).getMobile());
                         dialContentObserver.SetMobile(contacts.get(dialCount).getMobile());
                     }else{
-                        TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-                        String content = "ID="+tm.getDeviceId()+"&Phone="+"0"+"&Message="+"1";
-                        HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.STOP);
-                        thread.start();
-
-                       // sendBroadcast(new Intent("STOP_SPEECH"));
+                        dialedNumber = "0";
                     }
                     break;
                 case 1://拨打电话接通
-                    Bundle bundle = msg.getData();
-                    TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-                    String content = "ID="+tm.getDeviceId()+"&Phone="+bundle.get("mobile").toString()+"&Message"+"1";
-                    HttpConnectionThread thread = new HttpConnectionThread(content,HttpConnectionThread.STOP);
-                    thread.start();
+                    progressFragment.setImg_dial();
 
-                    //sendBroadcast(new Intent("STOP_SPEECH"));
+                    Bundle bundle = msg.getData();
+                    dialedNumber = bundle.get("mobile").toString();
+
                     break;
                 case 2:
                     sendPhotoCount += 1;
@@ -180,9 +182,11 @@ public class UiActivity extends Activity {
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.fragmentlayout, contactsFragment);
         transaction.commit();
+        speechIntent= new Intent(UiActivity.this, SpeechService.class);
         //开启蓝牙服务
-        Intent intent = new Intent(UiActivity.this,BluetoothServerService.class);
+        final Intent intent = new Intent(UiActivity.this,BluetoothServerService.class);
         startService(intent);
+        bluetoothServiceOn = true;
 
         //广播接收
         IntentFilter intentFilter = new IntentFilter();
@@ -190,6 +194,7 @@ public class UiActivity extends Activity {
         intentFilter.addAction("ALL_COMPLETE_START_DIAL");
         intentFilter.addAction("SMS_SEND_SUCCESS");
         intentFilter.addAction("SIGN_SOS_FROM_CLIENT");
+        intentFilter.addAction("STOP_SOS");
         registerReceiver(broadcastReceiver, intentFilter);
         networkUtil = new NetworkUtil();
         isDialed = false;
@@ -199,6 +204,23 @@ public class UiActivity extends Activity {
             public void onClick(View v) {
                 Intent intent = new Intent("SOS");
                 sendBroadcast(intent);
+            }
+        });
+        imgbtn_bluetooth_switch = (ImageButton) findViewById(R.id.imgbtn_bluetooth_switch);
+        imgbtn_bluetooth_switch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               if(bluetoothServiceOn){
+                   imgbtn_bluetooth_switch.setImageResource(R.drawable.bluetooth_off);
+                   bluetoothServiceOn = false;
+                   stopService(intent);
+                   BluetoothAdapter.getDefaultAdapter().disable();
+               }else{
+                   startService(intent);
+                   BluetoothAdapter.getDefaultAdapter().enable();
+                   imgbtn_bluetooth_switch.setImageResource(R.drawable.bluetooth_on);
+                   bluetoothServiceOn = true;
+               }
             }
         });
 
@@ -230,8 +252,7 @@ public class UiActivity extends Activity {
             String pic1 = bundle.getString("picPathBack");
             String pic2 = bundle.getString("picPathFront");
             progressFragment.setImg_photo();
-            speech.TextToSpeech("拍照完成");
-          //  sendBroadcast(new Intent(SpeechService.SMS_COMPLETED));
+
             photoCount = 0;
             sendPhotoCount = 0;
             if(pic1 != null){

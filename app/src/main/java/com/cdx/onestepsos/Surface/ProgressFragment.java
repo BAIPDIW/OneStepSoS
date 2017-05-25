@@ -14,6 +14,7 @@ import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,7 +24,6 @@ import com.cdx.onestepsos.Locate.Location;
 import com.cdx.onestepsos.MessageAndDial.SendMessage;
 import com.cdx.onestepsos.R;
 import com.cdx.onestepsos.Setting.Contact;
-import com.cdx.onestepsos.Voice.Speech;
 
 import java.util.ArrayList;
 
@@ -37,11 +37,12 @@ public class ProgressFragment extends Fragment {
     private ImageView img_location;
     private ImageView img_send_message;
     private ImageView img_photo;
-
+    private ImageView img_dial;
+    private Button btn_stop;
     private TextView tv_progress_location;
     private TextView tv_progress_send_message;
     private TextView tv_progress_photo;
-    private Speech speech;
+    private TextView tv_progress_dial;
     private String longitude;//经度
     private String latitude;//纬度
     private Handler myHandler = new Handler() {
@@ -55,21 +56,20 @@ public class ProgressFragment extends Fragment {
                     //发送短信
                     setLongitude(bundle.get("经度").toString());
                     setLatitude(bundle.get("纬度").toString());
-                    ArrayList<Contact> contacts = getContacts();
-                    for (int i = 0; i < contacts.size(); i++) {
-                        SendMessage sendMessage = new SendMessage(contacts.get(i).getMobile(),
-                                "<紧急求助!!!＞我遇到了困难,需要您的帮助,我现在的位置是" + bundle.get("地点").toString(),
-                                getActivity());
-                        sendMessage.Send();
 
-                    }
-                    // speech.TextToSpeech("发送短信完成,开始拍照");
-                    //拍照
                     TelephonyManager tm = (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE);
                     String content = "ID=" + tm.getDeviceId() + "&Longitude=" + bundle.get("经度").toString() + "&Latitude=" + bundle.get("纬度").toString();
                     HttpConnectionThread thread = new HttpConnectionThread(content, HttpConnectionThread.UPLOAD_LOCATION);
                     thread.start();
 
+                    ArrayList<Contact> contacts = getContacts();
+                    for (int i = 0; i < contacts.size(); i++) {
+                        SendMessage sendMessage = new SendMessage(contacts.get(i).getMobile(),
+                                "<紧急求助!!!＞我遇到了困难,需要您的帮助,我现在的位置是：" + bundle.get("地点").toString()+"，精度: "+bundle.get("精度"),
+                                getActivity());
+                        sendMessage.Send();
+
+                    }
                     img_send_message.setImageResource(R.drawable.gou);
                     Intent intent = new Intent(getActivity(), CameraActivity.class);
                     getActivity().startActivityForResult(intent, 1);
@@ -79,7 +79,7 @@ public class ProgressFragment extends Fragment {
                     SharedPreferences sp = getActivity().getSharedPreferences("userinfo",MODE_PRIVATE);
                     for (int i = 0; i < contacts2.size(); i++) {
                         SendMessage sendMessage = new SendMessage(contacts2.get(i).getMobile(),
-                                "<紧急求助!!!＞我遇到了困难,目前定位失败,我的默认地址是:"+sp.getString("default_location","未设置默认地址"),
+                                "<紧急求助!!!＞我遇到了困难,目前手机定位失败,我的默认地址是:"+sp.getString("default_location","未设置默认地址"),
                                 getActivity());
                         sendMessage.Send();
 
@@ -106,10 +106,23 @@ public class ProgressFragment extends Fragment {
         img_location = (ImageView) view.findViewById(R.id.img_location);
         img_send_message = (ImageView) view.findViewById(R.id.img_send_message);
         img_photo = (ImageView) view.findViewById(R.id.img_photo);
+        img_dial = (ImageView) view.findViewById(R.id.img_dial);
+
         tv_progress_location = (TextView) view.findViewById(R.id.tv_progress_location);
         tv_progress_photo = (TextView) view.findViewById(R.id.tv_progress_photo);
         tv_progress_send_message = (TextView) view.findViewById(R.id.tv_progress_send_message);
-        speech = new Speech(getActivity());
+        tv_progress_dial = (TextView) view.findViewById(R.id.tv_progress_dial);
+        btn_stop = (Button) view.findViewById(R.id.btn_stop);
+        btn_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent("STOP_SOS");
+                getActivity().sendBroadcast(intent);
+                Intent intent2 = new Intent("SPEECH_STOP_SOS");
+                getActivity().sendBroadcast(intent2);
+            }
+        });
+
         //开启定位
         Location location = new Location();
         location.init(this.getActivity().getApplicationContext());
@@ -121,6 +134,9 @@ public class ProgressFragment extends Fragment {
 
     public void setImg_photo() {
         img_photo.setImageResource(R.drawable.gou);
+    }
+    public void setImg_dial() {
+        img_dial.setImageResource(R.drawable.gou);
     }
 
     public ArrayList<Contact> getContacts() {

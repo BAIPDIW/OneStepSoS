@@ -37,8 +37,8 @@ public class Location {
     public AMapLocationListener mLocationListener = new AMapLocationListener() {
         @Override
         public void onLocationChanged(AMapLocation aMapLocation) {
-            tv_location.setText(LocationUtil.getLocationStr(aMapLocation));
-            tv_location.setTextSize(10);
+           // tv_location.setText(LocationUtil.getLocationStr(aMapLocation));
+            //tv_location.setTextSize(10);
             if(flag){
                 //一次定位成功,进度切换
                 Message message = handler.obtainMessage();
@@ -47,10 +47,13 @@ public class Location {
                     bundle.putString("经度", aMapLocation.getLongitude() + "");
                     bundle.putString("纬度", aMapLocation.getLatitude() + "");
                     bundle.putString("地点", aMapLocation.getAddress());
+                    bundle.putString("精度",aMapLocation.getAccuracy()+"");
                     message.setData(bundle);
                     message.what = 1;
                     message.sendToTarget();
+                    tv_location.setText("定位成功");
                 }else{
+                    tv_location.setText("定位失败");
                     message.what = 2;
                     message.sendToTarget();
                 }
